@@ -1,6 +1,6 @@
 # Dockerfile
 # Verwende das pandoc/latex Image als Basis
-FROM pandoc/latex
+FROM pandoc/latex:latest-ubuntu
 
 # Setze das Arbeitsverzeichnis im Container
 WORKDIR /app
