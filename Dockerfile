@@ -5,7 +5,7 @@ FROM pandoc/latex:latest-ubuntu
 # Setze das Arbeitsverzeichnis im Container
 WORKDIR /app
 
-# Installiere Python und pip (falls nicht bereits im pandoc/latex Image enthalten)
+# Installiere Python, pip und die Python-Abhängigkeiten über apt-get
 # pandoc/latex basiert auf Debian, daher apt-get
 RUN apt-get update && apt-get install -y \
     python3 \
@@ -15,10 +15,6 @@ RUN apt-get update && apt-get install -y \
 
 # Stelle sicher, dass 'python' auf 'python3' verweist, für pandoc-interne Skripte oder andere Tools.
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-
-# Kopiere die requirements.txt und installiere die Python-Abhängigkeiten
-#COPY requirements.txt .
-#RUN pip install --no-cache-dir -r requirements.txt
 
 # Kopiere die Flask-Anwendung
 COPY app.py .
@@ -30,7 +26,8 @@ COPY static/ static/
 # Exponiere den Port, auf dem die Flask-Anwendung lauschen wird
 EXPOSE 5000
 
-# Starte die Anwendung mit Gunicorn
-# "app:app" bedeutet, dass Gunicorn die Flask-Instanz namens "app" aus der Datei "app.py" laden soll
-# Gunicorn wird auf allen verfügbaren Netzwerkschnittstellen (0.0.0.0) auf Port 5000 lauschen.
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Setze den ENTRYPOINT auf Gunicorn, damit es als Hauptprozess gestartet wird
+ENTRYPOINT ["gunicorn"]
+
+# Übergebe die Argumente an Gunicorn
+CMD ["--bind", "0.0.0.0:5000", "app:app"]
