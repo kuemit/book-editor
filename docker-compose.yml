@@ -1,0 +1,10 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  web:
+    build: . # Baut das Docker-Image aus dem Dockerfile im aktuellen Verzeichnis
+    container_name: book_writer_app # Ein sprechender Name für den Container
+    ports:
+      - "5000:5000" # Mappt den Host-Port 5000 auf den Container-Port 5000
+    restart: unless-stopped # Stellt sicher, dass der Dienst neu gestartet wird, es sei denn, er wird manuell gestoppt

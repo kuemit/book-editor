@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buch-Schreib-Anwendung</title>
+    <!-- Tailwind CSS CDN für schnelles Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts für die Schriftarten Inter und Merriweather -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Merriweather:400,700&display=swap" rel="stylesheet">
+    <style>
+        /* Allgemeine Stile für das Anwendungs-Layout */
+        body {
+            font-family: 'Inter', sans-serif; /* Standard-Schriftart für die UI */
+            background-color: #f3f4f6; /* Heller grauer Hintergrund */
+        }
+
+        .container {
+            /* Responsives Layout für den gesamten Anwendungscontainer */
+            display: flex;
+            flex-direction: column; /* Vertikal gestapelt auf kleinen Bildschirmen */
+            width: 100%;
+            max-width: 1200px; /* Maximale Breite für größere Bildschirme */
+            height: calc(100vh - 2rem); /* Feste Höhe für den Anwendungscontainer */
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Überlauf im Container ausblenden */
+        }
+
+        @media (min-width: 768px) { /* Stile für mittlere Bildschirme und größer */
+            .container {
+                flex-direction: row; /* Nebeneinander auf größeren Bildschirmen */
+            }
+        }
+
+        .editor-panel {
+            width: 100%; /* Volle Breite auf kleinen Bildschirmen */
+            height: 50%; /* Halbe Höhe auf kleinen Bildschirmen */
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb; /* Trennlinie für gestapelte Ansicht */
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (min-width: 768px) {
+            .editor-panel {
+                width: 50%; /* Halbe Breite auf größeren Bildschirmen */
+                height: auto; /* Automatische Höhe, um den verbleibenden Platz zu füllen */
+                border-right: 1px solid #e5e7eb; /* Trennlinie für nebeneinanderliegende Ansicht */
+                border-bottom: none; /* Keine untere Trennlinie, wenn nebeneinander */
+            }
+        }
+
+        .preview-panel {
+            width: 100%; /* Volle Breite auf kleinen Bildschirmen */
+            height: 50%; /* Halbe Höhe auf kleinen Bildschirmen */
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; /* Scrollen für das gesamte Vorschau-Panel erlauben */
+        }
+
+        @media (min-width: 768px) {
+            .preview-panel {
+                width: 50%; /* Halbe Breite auf größeren Bildschirmen */
+                height: auto; /* Automatische Höhe, um den verbleibenden Platz zu füllen */
+            }
+        }
+
+        #markdown-editor {
+            flex-grow: 1; /* Lässt den Editor den verfügbaren Platz ausfüllen */
+            width: 100%;
+            padding: 1rem;
+            color: #1f2937; /* Dunkler Text */
+            background-color: #f9fafb; /* Sehr heller Hintergrund */
+            border: 1px solid #d1d5db; /* Leichter Rand */
+            border-radius: 0.5rem; /* Abgerundete Ecken */
+            font-family: monospace; /* Monospace-Schriftart für Code-Ähnlichkeit */
+            font-size: 0.875rem; /* Kleine Schriftgröße */
+            resize: none; /* Deaktiviert die manuelle Größenänderung durch den Benutzer */
+            outline: none; /* Entfernt den Standard-Fokus-Outline */
+            transition: border-color 0.2s, box-shadow 0.2s; /* Sanfter Übergang für Fokus-Effekte */
+        }
+
+        #markdown-editor:focus {
+            border-color: #3b82f6; /* Blauer Rand im Fokus */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); /* Blauer Schatten im Fokus */
+        }
+
+        /* Stile für den PDF-iframe */
+        #pdf-preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: #f0f0f0; /* Heller Hintergrund für den iframe-Bereich */
+            border-radius: 0.5rem;
+        }
+
+        .loading-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #6b7280;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="p-4 bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container">
+        <!-- Editor Panel -->
+        <div class="editor-panel">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Markdown Editor</h2>
+            <textarea
+                id="markdown-editor"
+                class="flex-grow w-full p-4 text-gray-800 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm resize-none"
+                placeholder="Schreiben Sie hier Ihr Buch im Markdown-Format..."
+            ># Mein Großartiges Buch
+
+**Von: Ein begeisterter Autor**
+
+---
+
+# Kapitel Eins: Der Anfang
+
+Dies ist der Beginn unseres Buches. Wir werden hier die Grundlagen legen und die ersten Schritte in unserer Geschichte machen.
+
+## Einleitung
+
+In diesem Abschnitt werden wir die Hauptthemen vorstellen, die wir in diesem Kapitel behandeln werden.
+
+### Die ersten Zeilen
+
+Jedes große Buch beginnt mit einer einzelnen Zeile.
+
+> "Alle glücklichen Familien gleichen einander, jede unglückliche Familie ist auf ihre eigene Weise unglücklich."
+> — Leo Tolstoi, Anna Karenina
+
+Markdown unterstützt **fette** und *kursive* Schrift.
+
+* Punkt 1
+* Punkt 2
+    * Unterpunkt A
+    * Unterpunkt B
+
+1.  Erster Schritt
+2.  Zweiter Schritt
+3.  Dritter Schritt
+
+Ein Code-Beispiel:
+
+```javascript
+function helloWorld() {
+    console.log("Hallo, Welt!");
+}
+helloWorld();
+```
+
+Ein Inline-Code-Beispiel: `console.log('Hallo');`
+
+Viel Spaß beim Schreiben!
+
+Dies ist ein weiterer Absatz, der dazu dient, mehr Inhalt hinzuzufügen und die Paginierung zu testen. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+Noch ein Absatz, um sicherzustellen, dass die Seitenumbrüche korrekt funktionieren. Es ist wichtig, dass der Text fließend von einer Seite zur nächsten übergeht, ohne dass Absätze mitten im Satz abgeschnitten werden. Dies erfordert eine sorgfältige Handhabung der DOM-Elemente und ihrer Höhen.
+
+Ein weiterer Testabsatz. Wir fügen weiterhin Text hinzu, um die Paginierungslogik auf die Probe zu stellen. Die Herausforderung besteht darin, die Elemente so zu verteilen, dass sie natürlich auf den Seiten erscheinen, als ob sie in einem echten Buch gedruckt wären.
+
+Ein letzter Absatz für dieses Kapitel, um zu sehen, wie die Paginierung am Ende eines Kapitels funktioniert. Es ist entscheidend, dass der Übergang zwischen Kapiteln sauber ist und neue Kapitel immer auf einer neuen Seite beginnen.
+
+---
+
+# Kapitel Zwei: Die Entwicklung
+
+Nach den ersten Schritten geht es nun um die Entwicklung der Geschichte und der Charaktere.
+
+## Charaktere
+
+Wir stellen neue Charaktere vor und vertiefen ihre Geschichten.
+
+### Protagonist
+
+Der Hauptcharakter steht im Mittelpunkt.
+
+Dies ist ein weiterer Absatz, der dazu dient, mehr Inhalt hinzuzufügen und die Paginierung zu testen. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+Noch ein Absatz, um sicherzustellen, dass die Seitenumbrüche korrekt funktionieren. Es ist wichtig, dass der Text fließend von einer Seite zur nächsten übergeht, ohne dass Absätze mitten im Satz abgeschnitten werden. Dies erfordert eine sorgfältige Handhabung der DOM-Elemente und ihrer Höhen.
+
+Ein weiterer Testabsatz. Wir fügen weiterhin Text hinzu, um die Paginierungslogik auf die Probe zu stellen. Die Herausforderung besteht darin, die Elemente so zu verteilen, dass sie natürlich auf den Seiten erscheinen, als ob sie in einem echten Buch gedruckt wären.
+
+Ein letzter Absatz für dieses Kapitel, um zu sehen, wie die Paginierung am Ende eines Kapitels funktioniert. Es ist entscheidend, dass der Übergang zwischen Kapiteln sauber ist und neue Kapitel immer auf einer neuen Seite beginnen.
+
+---
+
+# Kapitel Drei: Der Höhepunkt
+
+Das letzte Kapitel bringt die Geschichte zu ihrem Höhepunkt.
+
+## Die große Enthüllung
+
+Alle Geheimnisse werden gelüftet.
+
+### Das Ende
+
+Und so endet unsere Geschichte.
+            </textarea>
+            <button id="generate-preview-btn" class="mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
+                Vorschau generieren
+            </button>
+        </div>
+
+        <!-- Vorschau-Panel -->
+        <div class="preview-panel">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Buch-Vorschau (PDF)</h2>
+            <div id="book-preview" class="flex-grow flex items-center justify-center bg-gray-200 rounded-lg">
+                <iframe id="pdf-preview-iframe" src="" class="hidden"></iframe>
+                <div id="loading-message" class="loading-indicator">PDF wird generiert...</div>
+                <div id="error-message" class="loading-indicator text-red-600 hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const markdownEditor = document.getElementById('markdown-editor');
+        const generatePreviewBtn = document.getElementById('generate-preview-btn');
+        const pdfPreviewIframe = document.getElementById('pdf-preview-iframe');
+        const loadingMessage = document.getElementById('loading-message');
+        const errorMessage = document.getElementById('error-message');
+
+        // Die URL des Backends ist jetzt relativ, da es das Frontend hostet
+        const BACKEND_URL = '/convert';
+
+        /**
+         * Sendet Markdown-Text an das Backend und zeigt das zurückgegebene PDF an.
+         */
+        async function renderPdfPreview() {
+            // Zeige Ladeanzeige, blende Fehler und iframe aus
+            loadingMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+            pdfPreviewIframe.classList.add('hidden');
+            pdfPreviewIframe.src = ''; // Lösche vorheriges PDF
+
+            const markdownText = markdownEditor.value;
+
+            try {
+                const response = await fetch(BACKEND_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ markdown_text: markdownText }),
+                });
+
+                if (!response.ok) {
+                    // Wenn die Antwort nicht OK ist (z.B. 400, 500), lese die Fehlermeldung vom Backend
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP-Fehler! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const pdfData = data.pdf_data;
+
+                if (pdfData) {
+                    // Erstelle eine Blob-URL aus den Base64-kodierten PDF-Daten
+                    const byteCharacters = atob(pdfData); // Base64 dekodieren
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                    const blobUrl = URL.createObjectURL(blob);
+
+                    pdfPreviewIframe.src = blobUrl;
+                    pdfPreviewIframe.onload = () => {
+                        // Wenn der iframe das PDF geladen hat, blende Ladeanzeige aus und zeige iframe
+                        loadingMessage.classList.add('hidden');
+                        pdfPreviewIframe.classList.remove('hidden');
+                        // Gib die Objekt-URL frei, nachdem der iframe den Blob geladen hat,
+                        // um Speicher freizugeben.
+                        URL.revokeObjectURL(blobUrl);
+                    };
+                } else {
+                    throw new Error("Keine PDF-Daten vom Backend erhalten.");
+                }
+            } catch (error) {
+                console.error("Fehler beim Generieren des PDF:", error);
+                loadingMessage.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+                errorMessage.textContent = `Fehler: ${error.message}`; // Zeige die Fehlermeldung an
+            }
+        }
+
+        // Füge den Event Listener für den "Vorschau generieren"-Button hinzu
+        generatePreviewBtn.addEventListener('click', renderPdfPreview);
+
+        // Generiere eine initiale Vorschau, wenn die Seite geladen wird
+        window.onload = renderPdfPreview;
+    </script>
+</body>
+</html>
