@@ -9,19 +9,16 @@ WORKDIR /app
 # pandoc/latex basiert auf Debian, daher apt-get
 RUN apt-get update && apt-get install -y \
     python3 \
-    python3-pip \
-    build-essential \
-    libffi-dev \
-    libssl-dev \
-    python3-dev \
+    python3-flask \
+    python3-gunicorn \
     && rm -rf /var/lib/apt/lists/*
 
 # Stelle sicher, dass 'python' auf 'python3' verweist, für pandoc-interne Skripte oder andere Tools.
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 # Kopiere die requirements.txt und installiere die Python-Abhängigkeiten
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+#COPY requirements.txt .
+#RUN pip install --no-cache-dir -r requirements.txt
 
 # Kopiere die Flask-Anwendung
 COPY app.py .
