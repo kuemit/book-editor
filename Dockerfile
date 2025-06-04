@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     build-essential \
+    libffi-dev \
+    libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Stelle sicher, dass 'python' auf 'python3' verweist, für pandoc-interne Skripte oder andere Tools.
