@@ -1,6 +1,6 @@
 # Dockerfile
 # Verwende das pandoc/latex Image als Basis
-FROM pandoc/latex:latest-ubuntu
+FROM pandoc/latex
 
 # Setze das Arbeitsverzeichnis im Container
 WORKDIR /app
@@ -10,8 +10,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    # Optional: Installiere weitere Build-Tools, falls für Python-Pakete benötigt
-    # build-essential \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Stelle sicher, dass 'python' auf 'python3' verweist, für pandoc-interne Skripte oder andere Tools.
